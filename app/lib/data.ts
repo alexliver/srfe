@@ -8,6 +8,85 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import axios from 'axios';
+
+export async function newGame(id:string, sessionId:string) {
+  const response = await axios.post(getUrl('/new_game'), { id, sessionId }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function toggleReady(id:string, sessionId:string, isReady:boolean) {
+  const response = await axios.post(getUrl('/toggle_ready'), { id, sessionId, isReady }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function getGameSessionStatus(id:string, sessionId:string) {
+  const response = await axios.post(getUrl('/get_game_session_status'), { id, sessionId}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function startGame(id:string, sessionId:string) {
+  await axios.post(getUrl('/start_game'), { id, numShots: 6, numBullets: 1}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+}
+
+export async function getGameStatus(id:string, sessionId:string) {
+  const response = await axios.post(getUrl('/get_game_status'), { id, sessionId}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function move(id:string, isSelf:boolean) {
+  const response = await axios.post(getUrl('/move'), { gameId:id, isSelf}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function getLastMove(id:string) {
+  try {
+    const response = await axios.post(getUrl('/get_last_move'), { id}, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+    }); 
+    return response.data;
+  } catch(error) {
+    if (error.response && error.response.status === 404) return null;
+    throw error;
+  }
+}
+
+function getUrl(url: string): string {
+  return 'http://127.0.0.1:8080' + url;
+}
 
 export async function fetchRevenue() {
   try {

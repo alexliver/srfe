@@ -1,4 +1,14 @@
 import { Revenue } from './definitions';
+import { v4 as uuidv4 } from 'uuid';
+
+export const getSessionId = () => {
+  let value = localStorage.getItem('sessionId');
+  if (!value ) {
+    value = uuidv4();
+    localStorage.setItem('sessionId', value);
+  }
+  return value;
+};
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {

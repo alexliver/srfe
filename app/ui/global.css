@@ -2,17 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-input[type='number'] {
-  -moz-appearance: textfield;
-  appearance: textfield;
+/* styles/button.css */
+button {
+  background-color: #0070f3; /* Primary color */
+  border: none; /* Remove default border */
+  border-radius: 5px; /* Rounded corners */
+  color: white; /* Text color */
+  padding: 10px 20px; /* Padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Inline block */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for background and transform */
 }
 
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+button:hover {
+  background-color: #005bb5; /* Darker shade on hover */
+  transform: scale(1.05); /* Slightly increase size on hover */
 }
 
-input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+button:active {
+  background-color: #003f7f; /* Even darker shade on click */
+  transform: scale(1); /* Reset size on click */
+}
+
+button:disabled {
+  background-color: #cccccc; /* Light grey background for disabled state */
+  color: #666666; /* Dark grey text color for disabled state */
+  cursor: not-allowed; /* Not-allowed cursor */
+  transform: none; /* No transform on hover */
+}
+
+
+.bullet {
+  display: inline-block;
+  width: 10px; /* Bullet width */
+  height: 25px; /* Bullet height */
+  background-color: #4c4c4c; /* Bullet body color */
+  border-radius: 5px 5px 0 0; /* Rounded top corners */
+  position: relative;
+  margin-right: 10px; /* Space after the bullet */
+}
+
+.bullet::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 5px;
+  background-color: #d4af37; /* Bullet tip color */
+  border-radius: 5px 5px 0 0; /* Fully rounded top corners */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.bullet::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 5px;
+  background-color: #333; /* Bullet base color */
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
