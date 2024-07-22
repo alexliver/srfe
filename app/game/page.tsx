@@ -1,6 +1,6 @@
 "use client";
 import {getSessionId} from '@/app/lib/utils';
-import {getGameStatus, move, getLastMove} from '@/app/lib/data';
+import {getGameStatus, move} from '@/app/lib/data';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -11,6 +11,8 @@ export default function Page() {
   const id = searchParams.get("id");
   const [numShots, setNumShots] = useState(-1);
   const [numBullets, setNumBullets] = useState(-1);
+  const [playerOneLives, setPlayerOneLives] = useState(-1);
+  const [playerTwoLives, setPlayerTwoLives] = useState(-1);
   const [step, setStep] = useState(-1);
   const [turn, setTurn] = useState(-1);
   const [player, setPlayer] = useState(-1);
@@ -18,6 +20,7 @@ export default function Page() {
   const [showItem, setShowItem] = useState(false);
   const [lastResultText, setLastResultText] = useState('');
   const [isLoading, setLoading] = useState(true);
+  const [ numLivesLastBreath, setNumLivesLastBreath] = useState(0);
 
   const initGame = async () => {
     const gameStatus = await getGameStatus(id, getSessionId());
@@ -26,23 +29,16 @@ export default function Page() {
     setStep(gameStatus.step);
     setTurn(gameStatus.turn);
     setPlayer(gameStatus.player);
+    setPlayerOneLives(gameStatus.playerOneLives);
+    setPlayerTwoLives(gameStatus.playerTwoLives);
+    setNumLivesLastBreath(gameStatus.numLivesLastBreath);
     setLoading(false);
   };
 
   const scanNextMove = async () => {
     if (winner != -1) return;
-    const nextMove = await getLastMove(id);
-    if (nextMove) {
-      if (nextMove.step > step) {
-        updateResult (nextMove, nextMove.isSelf) ;
-        if (!nextMove.isHit && nextMove.player != player) {
-          if (nextMove.isSelf) 
-            setLastResultText( "the opponent pulled trigger on himself, but it's blank");
-          else
-            setLastResultText( "the opponent pulled trigger on you, but it's blank");
-        }
-      }
-    }
+    const nextMove = await getGameStatus(id, getSessionId());
+    updateResult (nextMove);
   };
 
   useEffect(() => {
@@ -60,7 +56,7 @@ export default function Page() {
       setLoading(true);
       setShowItem(false);
       setLastResultText('');
-      const result = await move(id, isSelf);
+      const result = await move(id, getSessionId(), isSelf);
       updateResult(result, isSelf);
       setLoading(false);
     };
@@ -72,18 +68,22 @@ export default function Page() {
     )
   };
 
-  const updateResult = (result, isSelf) => {
-    if (result.isHit) {
+  const updateResult = (result) => {
+    setPlayerOneLives(result.playerOneLives);
+    setPlayerTwoLives(result.playerTwoLives);
+    setTurn(result.turn);
+    setStep(result.step);
+    setNumBullets(result.numBullets);
+    setLastResultText(getLastResultText(result, player));
+    if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
-      if (isSelf)
-        winner = !turn;
+      if (result.playerOneLives == 0)
+        winner = 1;
       else
-        winner = turn;
+        winner = 0;
       setWinner(winner);
       return;
     }
-    setTurn(result.turn);
-    setStep(result.step);
   };
 
   const getWinnerComponent = () => {
@@ -107,7 +107,40 @@ export default function Page() {
     let result = [];
     for (let i = 0; i < numShots - step; i++) 
       result .push(<div className='bullet'></div>);
-    return result
+    return (
+      <div>
+        {result}
+        <div>
+          live bullets left: {numBullets}
+        </div>
+      </div>
+    )
+  };
+
+  const getOpponentComponent = () => getPlayerComponent(!player);
+  const getYourComponent = () => getPlayerComponent(player);
+
+  const getPlayerComponent = (compPlayer)  => {
+    let titleText;
+    if (compPlayer == player)
+      titleText = 'You';
+    else
+      titleText = 'Opponent';
+    let numLives;
+    if (compPlayer == 0)
+      numLives = playerOneLives;
+    else
+      numLives = playerTwoLives;
+    if (numLives <= numLivesLastBreath)
+      numLives = 'last breath';
+    return (
+      <div>
+        {titleText}
+        <div>
+          lives: {numLives}
+        </div>
+      </div>
+    )
   };
 
   if (isLoading) 
@@ -121,10 +154,12 @@ export default function Page() {
   return (
     <main >
       <div >
+        {getOpponentComponent()}
         {getBulletsComponent()}
         <button onClick={onClickGun} disabled={turn != player}>gun</button>
         {lastResultText}
         {getTurnComponent()}
+        {getYourComponent()}
       </div>
       {getItemComponent()}
     </main>
@@ -132,3 +167,36 @@ export default function Page() {
 }
 
 
+function getLastResultText(result, player) {
+  if (result.lastPlayer == -1)
+    return '';
+  if (player == result.lastPlayer) {
+    if (result.isHit) {
+      if (result.isSelf) {
+        return 'You just shot yourself. How could that happen?';
+      } else {
+        return 'You successfully shot your opponent!';
+      }
+    } else {
+      if (result.isSelf) {
+        return "It's a blank, as expected";
+      } else {
+        return "Well it's a blank. You'll lose this turn";
+      }
+    }
+  } else {
+    if (result.isHit) {
+      if (result.isSelf) {
+        return 'The opponent just shot himself/herself';
+      } else {
+        return "You got shot by the opponent!";
+      }
+    } else {
+      if (result.isSelf) {
+        return "The opponent tried to shoot himself/herself, but it's a blank";
+      } else {
+        return "The opponent tried to shoot you, but it's a blank";
+      }
+    }
+  }
+}

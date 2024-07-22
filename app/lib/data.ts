@@ -41,7 +41,10 @@ export async function getGameSessionStatus(id:string, sessionId:string) {
 }
 
 export async function startGame(id:string, sessionId:string) {
-  await axios.post(getUrl('/start_game'), { id, numShots: 6, numBullets: 1}, {
+  await axios.post(getUrl('/start_game'), { 
+      id, numShots: 6, numBullets: 1, numLives : 3, 
+      numLivesLastBreath : 2,
+    }, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
@@ -59,8 +62,8 @@ export async function getGameStatus(id:string, sessionId:string) {
   return response.data;
 }
 
-export async function move(id:string, isSelf:boolean) {
-  const response = await axios.post(getUrl('/move'), { gameId:id, isSelf}, {
+export async function move(id:string, sessionId:string, isSelf:boolean) {
+  const response = await axios.post(getUrl('/move'), { gameId:id, sessionId, isSelf}, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
