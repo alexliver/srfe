@@ -19,6 +19,7 @@ export default function Page() {
   const [step, setStep] = useState(-1);
   const [turn, setTurn] = useState(-1);
   const [lastEjected, setLastEjected] = useState(-1);
+  const [isSawedOff, setSawedOff] = useState(false);
   const [player, setPlayer] = useState(-1);
   const [winner, setWinner] = useState(-1);
   const [showGunMenu, setShowGunMenu] = useState(false);
@@ -41,6 +42,7 @@ export default function Page() {
     setNumLivesLastBreath(gameStatus.numLivesLastBreath);
     setNextRound(gameStatus.nextRound);
     setLastEjected(gameStatus.lastEjected);
+    setSawedOff(gameStatus.isSawedOff);
     setLoading(false);
   };
 
@@ -88,6 +90,7 @@ export default function Page() {
     setPlayerTwoItems(result.playerTwoItems);
     setLastEjected(result.lastEjected);
     setNextRound(result.nextRound);
+    setSawedOff(result.isSawedOff);
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
@@ -221,14 +224,18 @@ export default function Page() {
   };
 
   const getNextRoundComponent = () => {
-    if (nextRound == -1)
-      return null;
-    let text;
-    if (nextRound)
-      text = 'live';
-    else
-      text = 'blank';
-    return '(' + text + ')'
+    let result = '';
+    if (nextRound != -1) {
+      let text;
+      if (nextRound)
+        text = 'live';
+      else
+        text = 'blank';
+      result += ' (' + text + ')'
+    }
+    if (isSawedOff)
+      result += ' (sawed off)'
+    return result
   };
 
   if (isLoading) 
@@ -299,6 +306,8 @@ function getLastResultItemText(result, player) {
     return getLastResultItemTextDrink(result, player);
   if (result.lastItem.itemCode == 'magnifying_glass')
     return getLastResultItemTextMagnifyingGlass(result, player);
+  if (result.lastItem.itemCode == 'saw')
+    return getLastResultItemTextSaw(result, player);
   return '';
 }
 
@@ -326,5 +335,12 @@ function getLastResultItemTextMagnifyingGlass(result, player) {
     return "you took a peek of the next round";
   }
   return "the opponent took a peek of the next round. Be careful...";
+}
+
+function getLastResultItemTextSaw(result, player) {
+  if (player == result.lastPlayer) {
+    return "you sawed off the barrel";
+  }
+  return "the opponent sawed off the barrel";
 }
 
