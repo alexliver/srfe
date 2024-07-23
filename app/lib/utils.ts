@@ -1,7 +1,9 @@
 import { Revenue } from './definitions';
+import { useRouter } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid';
 
-export const getSessionId = () => {
+export const getSessionId = () : string => {
   let value = localStorage.getItem('sessionId');
   if (!value ) {
     value = uuidv4();
@@ -9,6 +11,17 @@ export const getSessionId = () => {
   }
   return value;
 };
+
+export const getQueryString = (q:string) : string => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const value = searchParams.get(q) ;
+
+  if (value !== null) {
+      return value;
+  }
+  throw new Error(`Missing query parameter: ${q}`);
+}
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {

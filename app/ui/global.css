@@ -125,3 +125,33 @@ button:disabled {
     top: 0;
     left: 5px;
 }
+
+
+.heart_pink {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: rgb(255,123,123);
+    transform: rotate(-45deg);
+}
+
+.heart_pink::before,
+.heart_pink::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(255,123,123);
+    border-radius: 50%;
+}
+
+.heart_pink::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart_pink::after {
+    top: 0;
+    left: 5px;
+}

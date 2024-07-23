@@ -8,7 +8,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export async function newGame(id:string, sessionId:string) {
   const response = await axios.post(getUrl('/new_game'), { id, sessionId }, {
@@ -42,10 +42,10 @@ export async function getGameSessionStatus(id:string, sessionId:string) {
 
 export async function startGame(id:string, sessionId:string) {
   await axios.post(getUrl('/start_game'), { 
-      id, numShots: 6, numBullets: 3, numLives : 4, 
+      id, numShots: -1, numBullets: -1, numLives : 8, 
       numLivesLastBreath : 2,
-      numMaxItems: 4, 
-      numItemsPerRound: 2,
+      numMaxItems: 8, 
+      numItemsPerRound: 4,
     }, {
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -64,7 +64,7 @@ export async function getGameStatus(id:string, sessionId:string) {
   return response.data;
 }
 
-export async function move(id:string, sessionId:string, isSelf:boolean, itemID:int) {
+export async function move(id:string, sessionId:string, isSelf:boolean, itemID:number) {
   const response = await axios.post(getUrl('/move'), { gameId:id, sessionId, isSelf, itemID}, {
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -83,7 +83,7 @@ export async function getLastMove(id:string) {
       },
     }); 
     return response.data;
-  } catch(error) {
+  } catch(error:any) {
     if (error.response && error.response.status === 404) return null;
     throw error;
   }

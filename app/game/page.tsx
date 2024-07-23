@@ -1,29 +1,39 @@
 "use client";
-import {getSessionId} from '@/app/lib/utils';
+import { Suspense } from 'react'
+import {getSessionId, getQueryString} from '@/app/lib/utils';
 import {getGameStatus, move} from '@/app/lib/data';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation'
 
 export default function Page() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  return (
+    <Suspense>
+      <Page1 />
+    </Suspense>
+  )
+}
+
+function Page1() {
+  const id:string = getQueryString('id');
   const [numShots, setNumShots] = useState(-1);
   const [numBullets, setNumBullets] = useState(-1);
   const [playerOneLives, setPlayerOneLives] = useState(-1);
   const [playerTwoLives, setPlayerTwoLives] = useState(-1);
   const [playerOneItems, setPlayerOneItems] = useState([]);
   const [playerTwoItems, setPlayerTwoItems] = useState([]);
+  const [maxLives, setMaxLives] = useState(-1);
   const [nextRound, setNextRound] = useState(-1);
   const [step, setStep] = useState(-1);
   const [turn, setTurn] = useState(-1);
   const [lastEjected, setLastEjected] = useState(-1);
   const [isSawedOff, setSawedOff] = useState(false);
+  const [handcuffedPlayer, setHandcuffedPlayer] = useState(-1);
+  const [wasHandcuffedPlayer, setWasHandcuffedPlayer] = useState(-1);
   const [player, setPlayer] = useState(-1);
   const [winner, setWinner] = useState(-1);
   const [showGunMenu, setShowGunMenu] = useState(false);
-  const [showItem, setShowItem] = useState(null);
+  const [showItem, setShowItem] = useState<any>(null);
   const [lastResultText, setLastResultText] = useState('');
   const [isLoading, setLoading] = useState(true);
   const [ numLivesLastBreath, setNumLivesLastBreath] = useState(0);
@@ -37,12 +47,15 @@ export default function Page() {
     setPlayer(gameStatus.player);
     setPlayerOneLives(gameStatus.playerOneLives);
     setPlayerTwoLives(gameStatus.playerTwoLives);
+    setMaxLives(gameStatus.maxLives);
     setPlayerOneItems(gameStatus.playerOneItems);
     setPlayerTwoItems(gameStatus.playerTwoItems);
     setNumLivesLastBreath(gameStatus.numLivesLastBreath);
     setNextRound(gameStatus.nextRound);
     setLastEjected(gameStatus.lastEjected);
     setSawedOff(gameStatus.isSawedOff);
+    setHandcuffedPlayer(gameStatus.handcuffedPlayer);
+    setWasHandcuffedPlayer(gameStatus.wasHandcuffedPlayer);
     setLoading(false);
   };
 
@@ -63,13 +76,13 @@ export default function Page() {
 
   const getGunMenuComponent = () => {
     if (!showGunMenu) return null;
-    const onClickUse = (isSelf) => async () => {
+    const onClickUse = (isSelf:boolean) => async () => {
       setLoading(true);
       setShowGunMenu(false);
       setShowItem(null);
       setLastResultText('');
       const result = await move(id, getSessionId(), isSelf, -1);
-      updateResult(result, isSelf);
+      updateResult(result);
       setLoading(false);
     };
     return (
@@ -80,17 +93,20 @@ export default function Page() {
     )
   };
 
-  const updateResult = (result) => {
+  const updateResult = (result:any) => {
     setPlayerOneLives(result.playerOneLives);
     setPlayerTwoLives(result.playerTwoLives);
     setTurn(result.turn);
     setStep(result.step);
     setNumBullets(result.numBullets);
+    setNumShots(result.numShots);
     setPlayerOneItems(result.playerOneItems);
     setPlayerTwoItems(result.playerTwoItems);
     setLastEjected(result.lastEjected);
     setNextRound(result.nextRound);
     setSawedOff(result.isSawedOff);
+    setHandcuffedPlayer(result.handcuffedPlayer);
+    setWasHandcuffedPlayer(result.wasHandcuffedPlayer);
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
@@ -135,34 +151,46 @@ export default function Page() {
     )
   };
 
-  const getOpponentComponent = () => getPlayerComponent(!player);
+  const getOpponentComponent = () => getPlayerComponent(player ^ 1);
   const getYourComponent = () => getPlayerComponent(player);
 
-  const getItemsComponent = (compPlayer) => {
+  const getItemsComponent = (compPlayer:number) => {
     let items;
     if (compPlayer == 0)
       items = playerOneItems;
     else
       items = playerTwoItems;
-    return items.map(item => {
+    return items.map((item:any) => {
       const onClickItem = () => {
         setShowItem(item);
         setShowGunMenu(false);
       };
+      let disableHandcuff = false;
+      if (item.itemCode == 'handcuff' && (handcuffedPlayer != -1 || wasHandcuffedPlayer != -1))
+        disableHandcuff = true;
+      let disableSaw = false;
+      if (item.itemCode == 'saw' && isSawedOff)
+        disableSaw = true;
+      let disableMagnifyingGlass = false;
+      if (item.itemCode == 'magnifying_glass' && nextRound != -1)
+        disableMagnifyingGlass = true;
       return (
-        <button disabled={compPlayer != player || turn != player} onClick={onClickItem}>
+        <button disabled={compPlayer != player || turn != player 
+        || disableHandcuff || disableSaw || disableMagnifyingGlass} onClick={onClickItem}>
           {item.itemCode}
         </button>
       )
     })
   };
 
-  const getPlayerComponent = (compPlayer)  => {
+  const getPlayerComponent = (compPlayer:number)  => {
     let titleText;
     if (compPlayer == player)
       titleText = 'You';
     else
       titleText = 'Opponent';
+    if (handcuffedPlayer == compPlayer || wasHandcuffedPlayer == compPlayer)
+      titleText += ' (handcuffed)';
     let numLives;
     if (compPlayer == 0)
       numLives = playerOneLives;
@@ -186,10 +214,12 @@ export default function Page() {
     )
   };
 
-  const getLivesComp = (numLives) => {
+  const getLivesComp = (numLives:number) => {
     const result = [];
-    for (let i = 0; i < numLives - numLivesLastBreath; i++)
+    for (let i = 0; i < maxLives - numLives; i++)
       result.push((<div className='heart_white'></div>));
+    for (let i = 0; i < numLives - numLivesLastBreath; i++)
+      result.push((<div className='heart_pink'></div>));
     for (let i = 0; i < numLivesLastBreath; i++)
       result.push((<div className='heart'></div>));
      return result;
@@ -204,7 +234,7 @@ export default function Page() {
       setLastResultText('');
       const result = await move(id, getSessionId(), false, showItem.id);
       setShowItem(null);
-      updateResult(result, false);
+      updateResult(result);
       setLoading(false);
     };
     const onClickNo = () => {
@@ -263,7 +293,7 @@ export default function Page() {
 }
 
 
-function getLastResultText(result, player) {
+function getLastResultText(result:any, player:number) {
   if (result.lastPlayer == -1)
     return '';
   if (result.lastItem)
@@ -279,7 +309,7 @@ function getLastResultText(result, player) {
       if (result.isSelf) {
         return "It's a blank, as expected";
       } else {
-        return "Well it's a blank. You'll lose this turn";
+        return "Well it's a blank";
       }
     }
   } else {
@@ -299,7 +329,7 @@ function getLastResultText(result, player) {
   }
 }
 
-function getLastResultItemText(result, player) {
+function getLastResultItemText(result:any, player:number) {
   if (result.lastItem.itemCode == 'cigarette')
     return getLastResultItemTextCigarette(result, player);
   if (result.lastItem.itemCode == 'drink')
@@ -308,17 +338,19 @@ function getLastResultItemText(result, player) {
     return getLastResultItemTextMagnifyingGlass(result, player);
   if (result.lastItem.itemCode == 'saw')
     return getLastResultItemTextSaw(result, player);
+  if (result.lastItem.itemCode == 'handcuff')
+    return getLastResultItemTextHandcuff(result, player);
   return '';
 }
 
-function getLastResultItemTextCigarette(result, player) {
+function getLastResultItemTextCigarette(result:any, player:number) {
   if (player == result.lastPlayer) {
     return "you used cigarette";
   }
   return "the opponent used cigarette";
 }
 
-function getLastResultItemTextDrink(result, player) {
+function getLastResultItemTextDrink(result:any, player:number) {
   let bulletText;
   if (result.lastEjected == 1)
     bulletText = 'live round';
@@ -330,17 +362,24 @@ function getLastResultItemTextDrink(result, player) {
   return "the opponent ejected a round. It's a " + bulletText;
 }
 
-function getLastResultItemTextMagnifyingGlass(result, player) {
+function getLastResultItemTextMagnifyingGlass(result:any, player:number) {
   if (player == result.lastPlayer) {
     return "you took a peek of the next round";
   }
   return "the opponent took a peek of the next round. Be careful...";
 }
 
-function getLastResultItemTextSaw(result, player) {
+function getLastResultItemTextSaw(result:any, player:number) {
   if (player == result.lastPlayer) {
     return "you sawed off the barrel";
   }
   return "the opponent sawed off the barrel";
+}
+
+function getLastResultItemTextHandcuff(result:any, player:number) {
+  if (player == result.lastPlayer) {
+    return "you handcuffed the opponent";
+  }
+  return "the opponent handcuffed you. Be careful...";
 }
 
