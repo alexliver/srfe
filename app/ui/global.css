@@ -67,3 +67,61 @@ button:disabled {
   bottom: 0;
   left: 0;
 }
+
+.heart {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: red;
+    transform: rotate(-45deg);
+}
+
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart::after {
+    top: 0;
+    left: 5px;
+}
+
+.heart_white {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: rgb(123,123,123);
+    transform: rotate(-45deg);
+}
+
+.heart_white::before,
+.heart_white::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(123,123,123);
+    border-radius: 50%;
+}
+
+.heart_white::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart_white::after {
+    top: 0;
+    left: 5px;
+}

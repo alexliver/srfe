@@ -131,16 +131,28 @@ export default function Page() {
       numLives = playerOneLives;
     else
       numLives = playerTwoLives;
+    let livesComp ;
     if (numLives <= numLivesLastBreath)
-      numLives = 'last breath';
+      livesComp = 'last breath';
+    else
+      livesComp = getLivesComp(numLives);
     return (
       <div>
         {titleText}
         <div>
-          lives: {numLives}
+          lives: {livesComp}
         </div>
       </div>
     )
+  };
+
+  const getLivesComp = (numLives) => {
+    const result = [];
+    for (let i = 0; i < numLives - numLivesLastBreath; i++)
+      result.push((<div className='heart_white'></div>));
+    for (let i = 0; i < numLivesLastBreath; i++)
+      result.push((<div className='heart'></div>));
+     return result;
   };
 
   if (isLoading) 
