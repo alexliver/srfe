@@ -15,8 +15,10 @@ export default function Page() {
   const [playerTwoLives, setPlayerTwoLives] = useState(-1);
   const [playerOneItems, setPlayerOneItems] = useState([]);
   const [playerTwoItems, setPlayerTwoItems] = useState([]);
+  const [nextRound, setNextRound] = useState(-1);
   const [step, setStep] = useState(-1);
   const [turn, setTurn] = useState(-1);
+  const [lastEjected, setLastEjected] = useState(-1);
   const [player, setPlayer] = useState(-1);
   const [winner, setWinner] = useState(-1);
   const [showGunMenu, setShowGunMenu] = useState(false);
@@ -37,6 +39,8 @@ export default function Page() {
     setPlayerOneItems(gameStatus.playerOneItems);
     setPlayerTwoItems(gameStatus.playerTwoItems);
     setNumLivesLastBreath(gameStatus.numLivesLastBreath);
+    setNextRound(gameStatus.nextRound);
+    setLastEjected(gameStatus.lastEjected);
     setLoading(false);
   };
 
@@ -82,6 +86,8 @@ export default function Page() {
     setNumBullets(result.numBullets);
     setPlayerOneItems(result.playerOneItems);
     setPlayerTwoItems(result.playerTwoItems);
+    setLastEjected(result.lastEjected);
+    setNextRound(result.nextRound);
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
@@ -214,6 +220,17 @@ export default function Page() {
     );
   };
 
+  const getNextRoundComponent = () => {
+    if (nextRound == -1)
+      return null;
+    let text;
+    if (nextRound)
+      text = 'live';
+    else
+      text = 'blank';
+    return '(' + text + ')'
+  };
+
   if (isLoading) 
     return ( <main > loading </main>);
   if (winner != -1)
@@ -227,7 +244,7 @@ export default function Page() {
       <div >
         {getOpponentComponent()}
         {getBulletsComponent()}
-        <button onClick={onClickGun} disabled={turn != player}>gun</button>
+        <button onClick={onClickGun} disabled={turn != player}>gun {getNextRoundComponent()}</button>
         {lastResultText}
         {getTurnComponent()}
         {getYourComponent()}
@@ -278,6 +295,10 @@ function getLastResultText(result, player) {
 function getLastResultItemText(result, player) {
   if (result.lastItem.itemCode == 'cigarette')
     return getLastResultItemTextCigarette(result, player);
+  if (result.lastItem.itemCode == 'drink')
+    return getLastResultItemTextDrink(result, player);
+  if (result.lastItem.itemCode == 'magnifying_glass')
+    return getLastResultItemTextMagnifyingGlass(result, player);
   return '';
 }
 
@@ -287,3 +308,23 @@ function getLastResultItemTextCigarette(result, player) {
   }
   return "the opponent used cigarette";
 }
+
+function getLastResultItemTextDrink(result, player) {
+  let bulletText;
+  if (result.lastEjected == 1)
+    bulletText = 'live round';
+  else
+    bulletText = 'blank';
+  if (player == result.lastPlayer) {
+    return "You ejected a round. It's a " + bulletText;
+  }
+  return "the opponent ejected a round. It's a " + bulletText;
+}
+
+function getLastResultItemTextMagnifyingGlass(result, player) {
+  if (player == result.lastPlayer) {
+    return "you took a peek of the next round";
+  }
+  return "the opponent took a peek of the next round. Be careful...";
+}
+
