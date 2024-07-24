@@ -1,8 +1,11 @@
 
 # Use the official Node.js image as the base image
-FROM node:18-alpine AS builder
-# bash
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+FROM node:22-alpine AS builder
+RUN npm config set proxy null
+RUN npm config set https-proxy null
+RUN npm config set registry http://registry.npmjs.org/
+# sh
+RUN npm install -g pnpm
 # Set the working directory
 WORKDIR /app
 
