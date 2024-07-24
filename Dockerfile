@@ -18,6 +18,8 @@ RUN pnpm i
 # Copy the rest of the application code to the working directory
 COPY . .
 
+ENV NEXT_PUBLIC_SR_URL=http://18.217.93.143:8080
+
 # Build the Next.js application
 RUN pnpm build
 

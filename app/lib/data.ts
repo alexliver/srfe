@@ -91,7 +91,7 @@ export async function getLastMove(id:string) {
 }
 
 function getUrl(url: string): string {
-  return 'http://127.0.0.1:8080' + url;
+  return process.env.NEXT_PUBLIC_SR_URL + url;
   //return 'http://18.217.93.143:8080' + url;
 }
 
