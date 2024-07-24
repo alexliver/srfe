@@ -46,6 +46,7 @@ export async function startGame(id:string, sessionId:string) {
       numLivesLastBreath : 2,
       numMaxItems: 8, 
       numItemsPerRound: 4,
+      isCompetitive: true,
     }, {
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -90,8 +91,8 @@ export async function getLastMove(id:string) {
 }
 
 function getUrl(url: string): string {
-  //return 'http://127.0.0.1:8080' + url;
-  return 'http://18.217.93.143:8080' + url;
+  return 'http://127.0.0.1:8080' + url;
+  //return 'http://18.217.93.143:8080' + url;
 }
 
 export async function fetchRevenue() {
