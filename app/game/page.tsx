@@ -1,4 +1,5 @@
 "use client";
+import { Tooltip } from 'react-tooltip'
 import { Suspense } from 'react'
 import {getSessionId, getQueryString} from '@/app/lib/utils';
 import {getGameStatus, move} from '@/app/lib/data';
@@ -36,6 +37,8 @@ function Page1() {
   const [showItem, setShowItem] = useState<any>(null);
   const [lastResultText, setLastResultText] = useState('');
   const [isLoading, setLoading] = useState(true);
+  const [lastMoveAt, setLastMoveAt] = useState(new Date());
+  const [timeLeft, setTimeLeft] = useState(90);
   const [ numLivesLastBreath, setNumLivesLastBreath] = useState(0);
 
   const initGame = async () => {
@@ -56,6 +59,7 @@ function Page1() {
     setSawedOff(gameStatus.isSawedOff);
     setHandcuffedPlayer(gameStatus.handcuffedPlayer);
     setWasHandcuffedPlayer(gameStatus.wasHandcuffedPlayer);
+    setLastMoveAt(new Date(gameStatus.lastMoveAt));
     setLoading(false);
   };
 
@@ -74,6 +78,17 @@ function Page1() {
     return () => clearInterval(key);
   }, [winner, step, player]);
 
+  useEffect(() => {
+    const key = setInterval(() => {
+      let seconds = (new Date().getTime() - lastMoveAt.getTime()) / 1000;
+      seconds = 90 - seconds;
+      if (seconds < 0)
+        seconds = 0;
+      setTimeLeft(Math.round(seconds));
+    }, 100);
+    return () => clearInterval(key);
+  }, [lastMoveAt]);
+
   const getGunMenuComponent = () => {
     if (!showGunMenu) return null;
     const onClickUse = (isSelf:boolean) => async () => {
@@ -87,8 +102,8 @@ function Page1() {
     };
     return (
       <div>
-        <button onClick={onClickUse(true)}>myself</button>
-        <button onClick={onClickUse(false)}>opponent</button>
+        <button onClick={onClickUse(true)} disabled={turn != player}>myself</button>
+        <button onClick={onClickUse(false)} disabled={turn != player}>opponent</button>
       </div>
     )
   };
@@ -107,6 +122,7 @@ function Page1() {
     setSawedOff(result.isSawedOff);
     setHandcuffedPlayer(result.handcuffedPlayer);
     setWasHandcuffedPlayer(result.wasHandcuffedPlayer);
+    setLastMoveAt(new Date(result.lastMoveAt));
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
@@ -160,7 +176,7 @@ function Page1() {
       items = playerOneItems;
     else
       items = playerTwoItems;
-    return items.map((item:any) => {
+    const buttons =  items.map((item:any) => {
       const onClickItem = () => {
         setShowItem(item);
         setShowGunMenu(false);
@@ -175,12 +191,21 @@ function Page1() {
       if (item.itemCode == 'magnifying_glass' && nextRound != -1)
         disableMagnifyingGlass = true;
       return (
-        <button disabled={compPlayer != player || turn != player 
-        || disableHandcuff || disableSaw || disableMagnifyingGlass} onClick={onClickItem}>
-          {item.itemCode}
+        <button data-tooltip-content={getItemTooltip(item.itemCode) }
+          data-tooltip-place="top"
+          data-tooltip-id="my-tooltip"
+          disabled={compPlayer != player || turn != player 
+          || disableHandcuff || disableSaw || disableMagnifyingGlass} onClick={onClickItem}>
+          {getItemText(item.itemCode)}
         </button>
       )
-    })
+    });
+    return (
+      <div>
+        {buttons}
+        <Tooltip id="my-tooltip" />
+      </div>
+    )
   };
 
   const getPlayerComponent = (compPlayer:number)  => {
@@ -243,7 +268,7 @@ function Page1() {
     return (
       <div>
         confirm to use {showItem.itemCode}?
-        <button onClick={onClickUseItem}>
+        <button onClick={onClickUseItem} disabled={player!=turn}>
           yes
         </button>
         <button onClick={onClickNo}>
@@ -268,6 +293,14 @@ function Page1() {
     return result
   };
 
+  const getTimerComponent  = () => {
+    return (
+      <div>
+        {timeLeft}
+      </div>
+    )
+  };
+
   if (isLoading) 
     return ( <main > loading </main>);
   if (winner != -1)
@@ -278,13 +311,19 @@ function Page1() {
     )
   return (
     <main >
+      {getTimerComponent()}
       <div >
         {getOpponentComponent()}
         {getBulletsComponent()}
-        <button onClick={onClickGun} disabled={turn != player}>gun {getNextRoundComponent()}</button>
+
+        <button data-tooltip-content="You can keep playing if you shoot yourself and don't die"
+          data-tooltip-place="top"
+          data-tooltip-id="my-tooltip2"
+          onClick={onClickGun} disabled={turn != player}>🔫 {getNextRoundComponent()}</button>
         {lastResultText}
         {getTurnComponent()}
         {getYourComponent()}
+        <Tooltip id="my-tooltip2" />
       </div>
       {getGunMenuComponent()}
       {getItemMenuComponent()}
@@ -383,3 +422,24 @@ function getLastResultItemTextHandcuff(result:any, player:number) {
   return "the opponent handcuffed you. Be careful...";
 }
 
+function getItemText(itemCode){
+  const mapping = {
+    "cigarette": "🚬", 
+    "drink": "🥤",
+    "magnifying_glass": "🔍", 
+    "saw": "🪚", 
+    "handcuff": "🛑",
+  }
+  return mapping[itemCode];
+}
+
+function getItemTooltip(itemCode) {
+  const mapping = {
+    "cigarette": "Cigarette: heals 1 life", 
+    "drink": "Drink: eject the next round",
+    "magnifying_glass": "Magnifier: take a peek of the next round", 
+    "saw": "Saw: double the damage of the next round", 
+    "handcuff": "Handcuff: opponent skips next round",
+  }
+  return mapping[itemCode];
+}

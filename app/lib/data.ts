@@ -43,7 +43,7 @@ export async function getGameSessionStatus(id:string, sessionId:string) {
 export async function startGame(id:string, sessionId:string) {
   await axios.post(getUrl('/start_game'), { 
       id, numShots: -1, numBullets: -1, numLives : 8, 
-      numLivesLastBreath : 2,
+      numLivesLastBreath : 0,
       numMaxItems: 8, 
       numItemsPerRound: 4,
       isCompetitive: true,
