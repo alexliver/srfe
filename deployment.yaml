@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: nextjs
-        image: 471112789277.dkr.ecr.us-east-2.amazonaws.com/srfe:latest
+        image: 471112789277.dkr.ecr.us-east-2.amazonaws.com/srfe:2
         ports:
         - containerPort: 3000

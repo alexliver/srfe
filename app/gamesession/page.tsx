@@ -1,4 +1,5 @@
 "use client";
+import Loading from '@/app/ui/loading';
 import {getSessionId, getQueryString} from '@/app/lib/utils';
 import {toggleReady, getGameSessionStatus, newGame, startGame} from '@/app/lib/data';
 import { useRouter } from 'next/navigation';
@@ -43,7 +44,7 @@ function Page1() {
       text = 'ready';
     else
       text = 'not ready';
-    return (<div>{text}</div>);
+    return (<span>{text}</span>);
   };
 
   const getReadyComponent = (isMe:boolean, isReady:boolean, setReady:any) => {
@@ -87,20 +88,21 @@ function Page1() {
   const playerTwoReadyComponent = getReadyComponent(player == 1, isPlayerTwoReady, 
     setPlayerTwoReady);
 
-  if (isLoading) 
-    return (<main>loading</main>);
   return (
     <main >
-      <div >
-        player one {playerOneReadyComponent}
+      {isLoading?<Loading />:null}
+      <div className='shakespeare'>
+        <div >
+          player one {playerOneReadyComponent}
+        </div>
+        <div >
+          player two {playerTwoReadyComponent}
+        </div>
+        <button onClick={onClickStartGame} disabled={!(isPlayerOneReady && isPlayerTwoReady) 
+        || player == 1}>
+          start game
+        </button>
       </div>
-      <div >
-        player two {playerTwoReadyComponent}
-      </div>
-      <button onClick={onClickStartGame} disabled={!(isPlayerOneReady && isPlayerTwoReady) 
-      || player == 1}>
-        start game
-      </button>
     </main>
   );
 }

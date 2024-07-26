@@ -1,4 +1,5 @@
 "use client";
+import Loading from '@/app/ui/loading';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {getSessionId} from '@/app/lib/utils';
@@ -17,14 +18,9 @@ export default function Page() {
     router.push('/gamesession?id=' + id);
   };
 
-  if (isLoading)
-    return (
-      <main >
-        loading
-      </main>
-    );
   return (
     <main >
+      {isLoading?<Loading />:null}
       <div >
         <button onClick={onClickNewGame}>
           new game

@@ -23,6 +23,22 @@ export const getQueryString = (q:string) : string => {
   throw new Error(`Missing query parameter: ${q}`);
 }
 
+export const getModalStyle = ():any => {
+  return {
+    overlay: {
+      zIndex:100,
+    },
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)'
+    },
+  };
+}
+
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',

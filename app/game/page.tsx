@@ -1,11 +1,15 @@
 "use client";
+import Link from 'next/link'
 import { Tooltip } from 'react-tooltip'
 import { Suspense } from 'react'
-import {getSessionId, getQueryString} from '@/app/lib/utils';
+import {getSessionId, getQueryString, getModalStyle} from '@/app/lib/utils';
 import {getGameStatus, move} from '@/app/lib/data';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation'
+import Modal from 'react-modal';
+import Loading from '@/app/ui/loading';
+import DisappearingText from '@/app/ui/disappearing_text';
 
 export default function Page() {
   return (
@@ -40,6 +44,7 @@ function Page1() {
   const [lastMoveAt, setLastMoveAt] = useState(new Date());
   const [timeLeft, setTimeLeft] = useState(90);
   const [ numLivesLastBreath, setNumLivesLastBreath] = useState(0);
+  const [ animationKey, setAnimationKey] = useState(0);
 
   const initGame = async () => {
     const gameStatus = await getGameStatus(id, getSessionId());
@@ -59,8 +64,9 @@ function Page1() {
     setSawedOff(gameStatus.isSawedOff);
     setHandcuffedPlayer(gameStatus.handcuffedPlayer);
     setWasHandcuffedPlayer(gameStatus.wasHandcuffedPlayer);
-    setLastMoveAt(new Date(gameStatus.lastMoveAt));
+    setLastMoveAt(new Date(gameStatus.lastMoveAt*1000));
     setLoading(false);
+    setAnimationKey(animationKey + 1);
   };
 
   const scanNextMove = async () => {
@@ -76,7 +82,7 @@ function Page1() {
   useEffect(() => {
     const key = setInterval(scanNextMove, 5000);
     return () => clearInterval(key);
-  }, [winner, step, player]);
+  }, [winner, step, player, lastMoveAt, animationKey]);
 
   useEffect(() => {
     const key = setInterval(() => {
@@ -101,14 +107,26 @@ function Page1() {
       setLoading(false);
     };
     return (
-      <div>
-        <button onClick={onClickUse(true)} disabled={turn != player}>myself</button>
-        <button onClick={onClickUse(false)} disabled={turn != player}>opponent</button>
-      </div>
+      <Modal isOpen={true}
+          style={getModalStyle()}
+          onRequestClose={() => setShowGunMenu(false)}
+          contentLabel="Use gun">
+        <span>
+          <button onClick={onClickUse(true)} disabled={turn != player}>myself</button>
+          <button onClick={onClickUse(false)} disabled={turn != player}>opponent</button>
+          <button onClick={() => setShowGunMenu(false)} >cancel</button>
+        </span>
+      </Modal>
     )
   };
 
   const updateResult = (result:any) => {
+    const newLastMoveAt = new Date(result.lastMoveAt*1000);
+    if (newLastMoveAt.getTime() !== lastMoveAt.getTime()) {
+      console.log(newLastMoveAt);
+      console.log(lastMoveAt);
+      setAnimationKey(animationKey + 1);
+    }
     setPlayerOneLives(result.playerOneLives);
     setPlayerTwoLives(result.playerTwoLives);
     setTurn(result.turn);
@@ -122,7 +140,7 @@ function Page1() {
     setSawedOff(result.isSawedOff);
     setHandcuffedPlayer(result.handcuffedPlayer);
     setWasHandcuffedPlayer(result.wasHandcuffedPlayer);
-    setLastMoveAt(new Date(result.lastMoveAt));
+    setLastMoveAt(newLastMoveAt);
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
       let winner;
@@ -136,10 +154,17 @@ function Page1() {
   };
 
   const getWinnerComponent = () => {
+    let text;
     if (winner == player)
-      return "you win";
+      text = "You win";
     else
-      return "you lose";
+      text = "You lose";
+    return (
+      <div className='shakespeare'>
+        <p>{text}</p>
+        <Link className='fancy-link' href="/">Home</Link>
+      </div>
+    );
   };
 
   const onClickGun = () => {
@@ -227,11 +252,9 @@ function Page1() {
     else
       livesComp = getLivesComp(numLives);
     return (
-      <div>
-        {titleText}
-        <div>
-          lives: {livesComp}
-        </div>
+      <div className='casino'>
+        {titleText}:
+        {livesComp}
         <div>
           {getItemsComponent(compPlayer)}
         </div>
@@ -266,15 +289,24 @@ function Page1() {
       setShowItem(null);
     };
     return (
-      <div>
-        confirm to use {showItem.itemCode}?
-        <button onClick={onClickUseItem} disabled={player!=turn}>
-          yes
-        </button>
-        <button onClick={onClickNo}>
-          no
-        </button>
-      </div>
+      <Modal isOpen={true}
+          style={getModalStyle()}
+          onRequestClose={onClickNo}
+          contentLabel="Use {showItem.itemCode}">
+        <div>
+          <div>
+            confirm to use {showItem.itemCode}?
+          </div>
+          <div>
+            <button onClick={onClickUseItem} disabled={player!=turn}>
+              yes
+            </button>
+            <button onClick={onClickNo}>
+              no
+            </button>
+          </div>
+        </div>
+      </Modal>
     );
   };
 
@@ -293,16 +325,6 @@ function Page1() {
     return result
   };
 
-  const getTimerComponent  = () => {
-    return (
-      <div>
-        {timeLeft}
-      </div>
-    )
-  };
-
-  if (isLoading) 
-    return ( <main > loading </main>);
   if (winner != -1)
     return (
       <main >
@@ -311,21 +333,24 @@ function Page1() {
     )
   return (
     <main >
-      {getTimerComponent()}
-      <div >
-        {getOpponentComponent()}
+      {isLoading?<Loading />:null}
+      {getYourComponent()}
+      <div className="wild-west">
         {getBulletsComponent()}
-
-        <button data-tooltip-content="You can keep playing if you shoot yourself and don't die"
-          data-tooltip-place="top"
-          data-tooltip-id="my-tooltip2"
+        <button 
           onClick={onClickGun} disabled={turn != player}>🔫 {getNextRoundComponent()}</button>
-        {lastResultText}
-        {getTurnComponent()}
-        {getYourComponent()}
-        <Tooltip id="my-tooltip2" />
+        {getGunMenuComponent()}
       </div>
-      {getGunMenuComponent()}
+      <div className='hacker-console'>
+        <div className='colorchange' key={animationKey}>
+          <div>{lastResultText}</div>
+          {getTurnComponent()}
+        </div>
+        <p>time left: {timeLeft}</p>
+        <p class="blink">_</p>
+      </div>
+      {getOpponentComponent()}
+      <Tooltip id="my-tooltip2" />
       {getItemMenuComponent()}
     </main>
   );
@@ -422,8 +447,8 @@ function getLastResultItemTextHandcuff(result:any, player:number) {
   return "the opponent handcuffed you. Be careful...";
 }
 
-function getItemText(itemCode){
-  const mapping = {
+function getItemText(itemCode:string){
+  const mapping:any = {
     "cigarette": "🚬", 
     "drink": "🥤",
     "magnifying_glass": "🔍", 
@@ -433,8 +458,8 @@ function getItemText(itemCode){
   return mapping[itemCode];
 }
 
-function getItemTooltip(itemCode) {
-  const mapping = {
+function getItemTooltip(itemCode:string) {
+  const mapping:any = {
     "cigarette": "Cigarette: heals 1 life", 
     "drink": "Drink: eject the next round",
     "magnifying_glass": "Magnifier: take a peek of the next round", 
