@@ -3,7 +3,7 @@ import Loading from '@/app/ui/loading';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {getSessionId} from '@/app/lib/utils';
-import {newGame} from '@/app/lib/data';
+import {newGame, joinKOTH} from '@/app/lib/data';
 import { useRouter } from 'next/navigation';
 
 export default function Page() {
@@ -18,12 +18,22 @@ export default function Page() {
     router.push('/gamesession?id=' + id);
   };
 
+  const onClickNewKOTH = () => {
+    setLoading(true);
+    const id = getId();
+    const sessionId = getSessionId();
+    router.push('/kothsession?id=' + id);
+  };
+
   return (
     <main >
       {isLoading?<Loading />:null}
       <div >
         <button onClick={onClickNewGame}>
           new game
+        </button>
+        <button onClick={onClickNewKOTH}>
+          new king of the hill
         </button>
       </div>
     </main>

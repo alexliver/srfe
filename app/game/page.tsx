@@ -11,15 +11,19 @@ import Modal from 'react-modal';
 import Loading from '@/app/ui/loading';
 import DisappearingText from '@/app/ui/disappearing_text';
 
-export default function Page() {
+interface ParentProps {
+  onGameFinish: any; // Type for children
+}
+
+export default function Page({onGameFinish}: ParentProps) {
   return (
     <Suspense>
-      <Page1 />
+      <Page1 onGameFinish={onGameFinish} />
     </Suspense>
   )
 }
 
-function Page1() {
+function Page1({onGameFinish}: ParentProps) {
   const id:string = getQueryString('id');
   const [numShots, setNumShots] = useState(-1);
   const [numBullets, setNumBullets] = useState(-1);
@@ -143,12 +147,15 @@ function Page1() {
     setLastMoveAt(newLastMoveAt);
     setLastResultText(getLastResultText(result, player));
     if (result.playerOneLives == 0 || result.playerTwoLives == 0) {
-      let winner;
+      if (winner == -1)
+        if (onGameFinish)
+          onGameFinish();
+      let newwinner;
       if (result.playerOneLives == 0)
-        winner = 1;
+        newwinner = 1;
       else
-        winner = 0;
-      setWinner(winner);
+        newwinner = 0;
+      setWinner(newwinner);
       return;
     }
   };

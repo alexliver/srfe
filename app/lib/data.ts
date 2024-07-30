@@ -20,6 +20,62 @@ export async function newGame(id:string, sessionId:string) {
   return response.data;
 }
 
+export async function joinKOTH(id:string, sessionId:string) {
+  const response = await axios.post(getUrl('/join_koth'), { id, sessionId }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function getKOTHStatus(id:string, sessionId:string) {
+  const response = await axios.post(getUrl('/get_koth_status'), { id, sessionId }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function toggleKOTHReady(id:string, sessionId:string, name:string) {
+  const response = await axios.post(getUrl('/toggle_koth_ready'), { id, sessionId , name}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function changeName(sessionId:string, name:string) {
+  const response = await axios.post(getUrl('/change_name'), { sessionId , name}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
+export async function startKOTH(id:string) {
+  const response = await axios.post(getUrl('/start_koth'), { 
+      id, numShots: -1, numBullets: -1, numLives : 8, 
+      numLivesLastBreath : 0,
+      numMaxItems: 8, 
+      numItemsPerRound: 4,
+      isCompetitive: true,
+  }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  }); 
+  return response.data;
+}
+
 export async function toggleReady(id:string, sessionId:string, isReady:boolean) {
   const response = await axios.post(getUrl('/toggle_ready'), { id, sessionId, isReady }, {
     headers: {
