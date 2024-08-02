@@ -139,7 +139,8 @@ export async function getLastMove(id:string) {
 
 function getUrl(url: string): string {
   //return process.env.NEXT_PUBLIC_SR_URL + url;
+  return process.env.REACT_APP_SR_URL + url;
   //return 'http://18.217.93.143:8080' + url;
-  return 'http://localhost:8080' + url;
+  //return 'http://localhost:8080' + url;
 }
 
