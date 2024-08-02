@@ -1,26 +1,46 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+"use client";
+import Loading from './component/loading';
+import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
+import {getSessionId} from './lib/utils';
+import {newGame, joinKOTH} from './lib/data';
+//import { useRouter } from 'next/navigation';
 
-function App() {
+export default function Page() {
+  const navigate = useNavigate();
+  const [isLoading, setLoading] = useState(false);
+  const onClickNewGame = async () => {
+    setLoading(true);
+    const id = getId();
+    const sessionId = getSessionId();
+    await newGame(id, sessionId);
+    navigate('/gamesession?id=' + id);
+  };
+
+  const onClickNewKOTH = () => {
+    setLoading(true);
+    const id = getId();
+    const sessionId = getSessionId();
+    navigate('/kothsession?id=' + id);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main >
+      {isLoading?<Loading />:null}
+      <div >
+        <button onClick={onClickNewGame}>
+          new game
+        </button>
+        <button onClick={onClickNewKOTH}>
+          new king of the hill
+        </button>
+      </div>
+    </main>
   );
 }
 
-export default App;
+function getId(): string {
+  return uuidv4();
+}
+

@@ -1,13 +1,543 @@
 body {
+  margin:0px;
+}
+#root {
+  margin:0px;
+}
+main {
+  flex-direction: column;
+  background-color: #2a2a2a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Arial', sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.kothcontainer {
+  flex-direction: column;
+  display: flex;
+  height: 100vh;
 }
+
+.kothcontainer main {
+  height: inherit; /* Fixed height */
+  flex: 1; 
+}
+
+.kothinfo {
+  height: 100px;
+}
+
+/* styles/button.css */
+button {
+  background-color: #0070f3; /* Primary color */
+  border: none; /* Remove default border */
+  border-radius: 5px; /* Rounded corners */
+  color: white; /* Text color */
+  padding: 10px 20px; /* Padding */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Inline block */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for background and transform */
+}
+
+button:hover {
+  background-color: #005bb5; /* Darker shade on hover */
+  transform: scale(1.05); /* Slightly increase size on hover */
+}
+
+button:active {
+  background-color: #003f7f; /* Even darker shade on click */
+  transform: scale(1); /* Reset size on click */
+}
+
+button:disabled {
+  background-color: #cccccc; /* Light grey background for disabled state */
+  color: #666666; /* Dark grey text color for disabled state */
+  cursor: not-allowed; /* Not-allowed cursor */
+  transform: none; /* No transform on hover */
+}
+
+
+.bullet {
+  display: inline-block;
+  width: 10px; /* Bullet width */
+  height: 25px; /* Bullet height */
+  background-color: #4c4c4c; /* Bullet body color */
+  border-radius: 5px 5px 0 0; /* Rounded top corners */
+  position: relative;
+  margin-right: 10px; /* Space after the bullet */
+}
+
+.bullet::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 5px;
+  background-color: #d4af37; /* Bullet tip color */
+  border-radius: 5px 5px 0 0; /* Fully rounded top corners */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.bullet::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 5px;
+  background-color: #333; /* Bullet base color */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.heart {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: red;
+    transform: rotate(-45deg);
+}
+
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart::after {
+    top: 0;
+    left: 5px;
+}
+
+.heart_white {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: rgb(123,123,123);
+    transform: rotate(-45deg);
+}
+
+.heart_white::before,
+.heart_white::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(123,123,123);
+    border-radius: 50%;
+}
+
+.heart_white::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart_white::after {
+    top: 0;
+    left: 5px;
+}
+
+
+.heart_pink {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: rgb(255,123,123);
+    transform: rotate(-45deg);
+}
+
+.heart_pink::before,
+.heart_pink::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(255,123,123);
+    border-radius: 50%;
+}
+
+.heart_pink::before {
+    top: -5px;
+    left: 0;
+}
+
+.heart_pink::after {
+    top: 0;
+    left: 5px;
+}
+
+
+.hacker-console {
+  background-color: #000;
+  color: #00ff00;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 20px;
+  border: 2px solid #00ff00;
+  width: 80%;
+  max-width: 500px;
+  overflow: auto;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.colorchange {
+  animation: changeColor 1.5s ease-out forwards; /* Apply animation */
+}
+
+@keyframes changeColor {
+  0% { color: #ff0000; }
+  100% { color: #00ff00; }
+}
+
+.hacker-console h1 {
+  color: #00ff00;
+  font-size: 24px;
+  margin: 0 0 10px 0;
+}
+
+.hacker-console p {
+  margin: 0;
+}
+
+.hacker-console .blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    visibility: hidden;
+  }
+  50% {
+    visibility: visible;
+  }
+}
+
+.wild-west {
+  background-color: #d2b48c;
+  color: #4b2e1a;
+  font-family: 'Georgia', serif;
+  padding: 20px;
+  border: 5px solid #8b4513;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.wild-west h1 {
+  font-family: 'Georgia', serif;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.wild-west p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.wild-west:before,
+.wild-west:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 5px solid #8b4513;
+  top: -10px;
+  left: -10px;
+  z-index: -1;
+}
+
+.wild-west:after {
+  top: 10px;
+  left: 10px;
+}
+
+
+.casino {
+  background-color: #000;
+  color: #ffd700;
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  border: 5px solid #c0c0c0;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+  position: relative;
+}
+
+.casino h1 {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #ff0000;
+  text-shadow: 2px 2px #000;
+}
+
+.casino p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.casino:before,
+.casino:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 5px solid #c0c0c0;
+  top: -10px;
+  left: -10px;
+  z-index: -1;
+  border-radius: 10px;
+}
+
+.casino:after {
+  top: 10px;
+  left: 10px;
+}
+
+
+.shakespeare {
+  background-color: #fff;
+  border: 2px solid #d4af37; /* Gold color */
+  border-radius: 12px;
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.shakespeare h1 {
+  font-family: 'Garamond', serif;
+  font-size: 2.5em;
+  color: #2a2a2a; /* Dark gray color */
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.shakespeare p {
+  font-family: 'Garamond', serif;
+  font-size: 1.2em;
+  color: #333; /* Slightly lighter dark gray */
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+/* Fancy link styling */
+.fancy-link {
+  position: relative;
+  text-decoration: none; /* Remove underline */
+  color: #3498db; /* Primary link color */
+  font-family: 'Arial', sans-serif; /* Font style */
+  font-size: 18px; /* Font size */
+  padding: 10px 15px; /* Padding around the text */
+  border-radius: 8px; /* Rounded corners */
+  background: linear-gradient(45deg, #3498db, #8e44ad); /* Gradient background */
+  background-clip: text; /* Clip background to text */
+  color: transparent; /* Hide text color */
+  transition: color 0.4s ease, transform 0.3s ease; /* Smooth transitions */
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Shadow effect */
+}
+
+/* Fancy link hover effect */
+.fancy-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.4s ease;
+  z-index: 1;
+}
+
+/* Hover state styling */
+.fancy-link:hover {
+  color: #fff; /* Text color on hover */
+  transform: scale(1.05); /* Slightly enlarge the link */
+}
+
+.fancy-link:hover::before {
+  transform: scaleX(1); /* Expand the overlay effect */
+}
+
+/* Active state styling */
+.fancy-link:active {
+  color: #2980b9; /* Darker color when active */
+  transform: scale(0.98); /* Slightly shrink the link */
+}
+
+/* Base styling for the full-screen loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure it sits on top of other content */
+}
+
+/* Loading spinner styling */
+.spinner {
+  border: 8px solid rgba(0, 0, 0, 0.2); /* Light border */
+  border-top: 8px solid #3498db; /* Colored border */
+  border-radius: 50%; /* Circular shape */
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite; /* Spin animation */
+}
+
+/* Spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Loading text styling */
+.loading-overlay p {
+  color: #fff;
+  font-size: 18px;
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+/* Main content styling for demonstration */
+.content {
+  padding: 20px;
+}
+
+
+/* Styling for the animated text */
+.animated-text {
+  font-size: 24px; /* Initial font size */
+  color: #3498db; /* Text color */
+  text-align: center;
+  text-shadow:
+    1px 1px 0 #fff, /* Horizontal and vertical offset of the shadow */
+    -1px -1px 0 #fff, /* Additional shadows to create the outline effect */
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff;
+  animation: enlargeAndDisappear 1.5s ease-out forwards; /* Apply animation */
+}
+
+/* Keyframes for enlarging and disappearing effect */
+@keyframes enlargeAndDisappear {
+  0% {
+    transform: scale(1); /* Start at normal size */
+    color: #3498db; /* Starting color */
+    opacity: 1; /* Fully visible */
+  }
+  50% {
+    transform: scale(2); /* Enlarge text */
+    color: #e74c3c; /* Intermediate color */
+    opacity: 0.7; /* Partially transparent */
+  }
+  100% {
+    transform: scale(3); /* Further enlarge text */
+    color: #3498db; /* Ending color */
+    opacity: 0; /* Fully transparent */
+  }
+}
+
+.animated-overlay {
+  position: fixed; /* Fixed position to keep it in the viewport */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* Ensure it's above other content */
+  pointer-events: none; 
+}
+
+
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Arial', sans-serif;
+    margin: 20px 0;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* Table header styling */
+th {
+    background-color: #4CAF50;
+    color: white;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Table body row styling */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+/* Table cell styling */
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+/* First column special styling */
+td:first-child {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Optional: Add a slight transition for hover effects */
+th, td {
+    transition: background-color 0.3s ease;
+}
+
+/* Add some extra spacing and styling for the table container */
+.table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
